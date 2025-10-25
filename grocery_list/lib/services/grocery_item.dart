@@ -1,4 +1,3 @@
-
 class GroceryItem {
   int? id;
   String name;
@@ -6,8 +5,8 @@ class GroceryItem {
   String category;
   String? notes;
   bool purchased;
-  String priority; 
-  double? estimatedPrice;
+  String priority; // e.g., 'Normal', 'Need Today'
+  double? estimatedPrice; // optional
 
   GroceryItem({
     this.id,
