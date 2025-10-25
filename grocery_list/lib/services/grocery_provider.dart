@@ -1,4 +1,3 @@
-// lib/providers/grocery_provider.dart
 import 'package:flutter/foundation.dart';
 import 'grocery_item.dart';
 import 'db_helper.dart';

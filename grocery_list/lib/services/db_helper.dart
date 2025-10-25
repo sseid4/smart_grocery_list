@@ -1,4 +1,3 @@
-// lib/data/db_helper.dart
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'grocery_item.dart';
