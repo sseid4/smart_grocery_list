@@ -87,6 +87,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     _searchController.clear();
                   }),
                 ),
+                IconButton(
+                  onPressed: _openSettings,
+                  icon: const Icon(Icons.settings),
+                ),
               ],
             )
           : AppBar(
@@ -112,6 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.search),
                   onPressed: () => setState(() => _showSearch = true),
                 ),
+                IconButton(
+                  onPressed: _openSettings,
+                  icon: const Icon(Icons.settings),
+                ),
               ],
             ),
       body: Column(
@@ -130,17 +138,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton.icon(
                   onPressed: _openCategories,
                   icon: const Icon(Icons.category),
-                  label: const Text('Cat'),
+                  label: const Text('Categories'),
                 ),
                 ElevatedButton.icon(
                   onPressed: _openWeekly,
                   icon: const Icon(Icons.calendar_today),
                   label: const Text('Weekly'),
                 ),
-                IconButton(
-                  onPressed: _openSettings,
-                  icon: const Icon(Icons.settings),
-                ),
+
               ],
             ),
           ),
