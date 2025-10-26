@@ -21,15 +21,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String? _category;
   String _priority = 'Medium';
 
-  static const List<String> _categories = [
-    'Fruits',
-    'Vegetables',
-    'Dairy',
-    'Bakery',
-    'Pantry',
-    'Meat',
-    'Frozen',
-  ];
 
   static const List<String> _priorities = ['High', 'Medium', 'Low'];
 
@@ -165,16 +156,22 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Category dropdown
-              DropdownButtonFormField<String>(
-                value: _category,
-                decoration: const InputDecoration(labelText: 'Category'),
-                items: _categories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                    .toList(),
-                onChanged: (v) => setState(() => _category = v),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Select a category' : null,
+              // Category dropdown (driven by InMemoryRepo categories)
+              ValueListenableBuilder<List<String>>(
+                valueListenable: InMemoryRepo.instance.categories,
+                builder: (context, cats, _) {
+                  final value = (cats.contains(_category)) ? _category : null;
+                  return DropdownButtonFormField<String>(
+                    value: value,
+                    decoration: const InputDecoration(labelText: 'Category'),
+                    items: cats
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _category = v),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Select a category' : null,
+                  );
+                },
               ),
               const SizedBox(height: 12),
 

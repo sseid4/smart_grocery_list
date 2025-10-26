@@ -8,6 +8,15 @@ class InMemoryRepo {
   static final InMemoryRepo instance = InMemoryRepo._init();
 
   final ValueNotifier<List<Item>> items = ValueNotifier<List<Item>>([]);
+  final ValueNotifier<List<String>> categories = ValueNotifier<List<String>>([
+    'Fruits',
+    'Vegetables',
+    'Dairy',
+    'Bakery',
+    'Pantry',
+    'Meat',
+    'Frozen',
+  ]);
   int _nextId = 1;
 
   List<Item> get all => List.unmodifiable(items.value);
@@ -47,6 +56,30 @@ class InMemoryRepo {
   void addItem(Item item) {
     final toAdd = item.copyWith(id: _nextId++);
     items.value = [toAdd, ...items.value];
+  }
+
+  void addCategory(String name) {
+    if (name.trim().isEmpty) return;
+    final curr = List<String>.from(categories.value);
+    if (!curr.any((c) => c.toLowerCase() == name.toLowerCase())) {
+      curr.add(name);
+      categories.value = curr;
+    }
+  }
+
+  void renameCategory(int index, String newName) {
+    if (index < 0 || index >= categories.value.length) return;
+    final curr = List<String>.from(categories.value);
+    curr[index] = newName;
+    categories.value = curr;
+    // Optionally update items that used the old category? Keep as-is for now.
+  }
+
+  void deleteCategory(int index) {
+    if (index < 0 || index >= categories.value.length) return;
+    final curr = List<String>.from(categories.value);
+    curr.removeAt(index);
+    categories.value = curr;
   }
 
   void updateItem(Item updated) {
