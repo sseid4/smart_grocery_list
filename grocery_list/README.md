@@ -34,4 +34,4 @@ Notes
  - The project uses a ValueNotifier-based in-memory store for simplicity. If you prefer a more structured state-management approach, migrating to Provider/ChangeNotifier or Riverpod is straightforward.
  - Running `flutter analyze` will show a few informational lints about deprecated APIs (some widgets migrated away from deprecated Radio APIs).
 
-If you'd like, I can add a CONTRIBUTING.md, a CHANGELOG.md, or CI configuration next.
+
