@@ -54,7 +54,7 @@ class TemplatesScreen extends StatelessWidget {
                             ],
                           ),
                         );
-                        if (confirmed == true) {
+                          if (confirmed == true) {
                           // Convert planData items into Items and replace repo items
                           final data = tpl.planData as Map<String, dynamic>;
                           final items = <dynamic>[];
@@ -83,7 +83,10 @@ class TemplatesScreen extends StatelessWidget {
                           }
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Template applied')),
+                            SnackBar(
+                              content: const Text('Template applied'),
+                              duration: const Duration(milliseconds: 900),
+                            ),
                           );
                         }
                       },
@@ -114,7 +117,10 @@ class TemplatesScreen extends StatelessWidget {
                           );
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Template deleted')),
+                            SnackBar(
+                              content: const Text('Template deleted'),
+                              duration: const Duration(milliseconds: 900),
+                            ),
                           );
                         }
                       },

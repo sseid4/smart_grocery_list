@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import '../utils/icon_mapper.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../services/in_memory_repo.dart';
 import '../widgets/priority_indicator.dart';
 
@@ -15,59 +20,177 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen> {
   Future<void> _showAddDialog() async {
     final controller = TextEditingController();
+    String? pickedImage;
     final result = await showDialog<String?>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add category'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Category name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Add'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx2, setState2) {
+            return AlertDialog(
+              title: const Text('Add category'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      hintText: 'Category name',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            final XFile? p = await ImagePicker().pickImage(
+                              source: ImageSource.gallery,
+                            );
+                            if (p != null)
+                              setState2(() => pickedImage = p.path);
+                          } catch (e) {}
+                        },
+                        child: CircleAvatar(
+                          radius: 26,
+                          backgroundColor: Colors.grey.shade200,
+                          backgroundImage: (pickedImage != null)
+                              ? FileImage(File(pickedImage!))
+                              : null,
+                          child: (pickedImage == null)
+                              ? const Icon(Icons.image)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextButton.icon(
+                          onPressed: () async {
+                            try {
+                              final XFile? p = await ImagePicker().pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (p != null)
+                                setState2(() => pickedImage = p.path);
+                            } catch (e) {}
+                          },
+                          icon: const Icon(Icons.photo_library),
+                          label: const Text('Select image (optional)'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () =>
+                      Navigator.of(ctx).pop(controller.text.trim()),
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (result != null && result.isNotEmpty) {
-      InMemoryRepo.instance.addCategory(result);
+      InMemoryRepo.instance.addCategoryWithImage(
+        result,
+        imagePath: pickedImage,
+      );
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Category "$result" added')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Category "$result" added'),
+          duration: const Duration(milliseconds: 900),
+        ),
+      );
     }
   }
 
   Future<void> _showRenameDialog(String currentName) async {
     final controller = TextEditingController(text: currentName);
+    String? pickedImage;
     final result = await showDialog<String?>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rename category'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'New name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Rename'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx2, setState2) {
+            return AlertDialog(
+              title: const Text('Rename category'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    decoration: const InputDecoration(hintText: 'New name'),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          try {
+                            final XFile? p = await ImagePicker().pickImage(
+                              source: ImageSource.gallery,
+                            );
+                            if (p != null)
+                              setState2(() => pickedImage = p.path);
+                          } catch (e) {}
+                        },
+                        child: CircleAvatar(
+                          radius: 26,
+                          backgroundColor: Colors.grey.shade200,
+                          backgroundImage: (pickedImage != null)
+                              ? FileImage(File(pickedImage!))
+                              : null,
+                          child: (pickedImage == null)
+                              ? const Icon(Icons.image)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextButton.icon(
+                          onPressed: () async {
+                            try {
+                              final XFile? p = await ImagePicker().pickImage(
+                                source: ImageSource.gallery,
+                              );
+                              if (p != null)
+                                setState2(() => pickedImage = p.path);
+                            } catch (e) {}
+                          },
+                          icon: const Icon(Icons.photo_library),
+                          label: const Text('Select image (optional)'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () =>
+                      Navigator.of(ctx).pop(controller.text.trim()),
+                  child: const Text('Rename'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (result != null && result.isNotEmpty) {
@@ -77,12 +200,21 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       );
       if (idx != -1) {
         InMemoryRepo.instance.renameCategory(idx, result);
+        if (pickedImage != null) {
+          InMemoryRepo.instance.setCategoryImage(result, pickedImage);
+        }
       } else {
-        InMemoryRepo.instance.addCategory(result);
+        InMemoryRepo.instance.addCategoryWithImage(
+          result,
+          imagePath: pickedImage,
+        );
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('"$currentName" renamed to "$result"')),
+        SnackBar(
+          content: Text('"$currentName" renamed to "$result"'),
+          duration: const Duration(milliseconds: 900),
+        ),
       );
     }
   }
@@ -92,9 +224,12 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final idx = cats.indexWhere((c) => c.toLowerCase() == name.toLowerCase());
     if (idx != -1) InMemoryRepo.instance.deleteCategory(idx);
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Category "$name" deleted')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Category "$name" deleted'),
+        duration: const Duration(milliseconds: 900),
+      ),
+    );
   }
 
   @override
@@ -136,9 +271,42 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   return ExpansionTile(
                     title: Row(
                       children: [
+                        // category image if present, otherwise emoji derived from name
+                        Builder(
+                          builder: (ctx) {
+                            final images =
+                                InMemoryRepo.instance.categoryImages.value;
+                            final path = images[name];
+                            if (path != null && path.isNotEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundImage: FileImage(File(path)),
+                                  backgroundColor: Colors.grey.shade200,
+                                ),
+                              );
+                            }
+                            final emoji = emojiForCategoryName(name);
+                            if (emoji != null) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: Colors.transparent,
+                                  child: Text(
+                                    emoji,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
                         Expanded(child: Text(name)),
                         PopupMenuButton<String>(
-                          onSelected: (value) {
+                          onSelected: (value) async {
                             if (value == 'rename') {
                               _showRenameDialog(name);
                             } else if (value == 'delete') {
@@ -167,16 +335,57 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                   _deleteCategory(name);
                                 }
                               });
+                            } else if (value == 'set_image') {
+                              try {
+                                final XFile? p = await ImagePicker().pickImage(
+                                  source: ImageSource.gallery,
+                                );
+                                if (p != null) {
+                                  InMemoryRepo.instance.setCategoryImage(
+                                    name,
+                                    p.path,
+                                  );
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Image set for "$name"'),
+                                      duration: const Duration(milliseconds: 900),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                // ignore
+                              }
+                            } else if (value == 'clear_image') {
+                              InMemoryRepo.instance.setCategoryImage(
+                                name,
+                                null,
+                              );
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Image cleared for "$name"'),
+                                  duration: const Duration(milliseconds: 900),
+                                ),
+                              );
                             }
                           },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(
+                          itemBuilder: (_) => [
+                            const PopupMenuItem(
                               value: 'rename',
                               child: Text('Rename'),
                             ),
-                            PopupMenuItem(
+                            const PopupMenuItem(
                               value: 'delete',
                               child: Text('Delete'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'set_image',
+                              child: Text('Change image'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'clear_image',
+                              child: Text('Clear image'),
                             ),
                           ],
                         ),
@@ -226,13 +435,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                           InMemoryRepo.instance.deleteItem(
                                             it.id,
                                           );
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text(
-                                                '${it.name} deleted',
-                                              ),
+                                              content: Text('${it.name} deleted'),
+                                              duration: const Duration(milliseconds: 900),
                                             ),
                                           );
                                         },

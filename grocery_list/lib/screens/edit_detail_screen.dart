@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/item.dart';
 import '../services/in_memory_repo.dart';
 
-/// Editable item view with Update and Delete actions.
+// Editable item view with update and delete actions.
 class EditDetailScreen extends StatefulWidget {
   static const routeName = '/edit-detail';
   final Item? item;
@@ -26,6 +29,7 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
   static const List<String> _priorities = ['High', 'Medium', 'Low'];
 
   late Item _item;
+  String? _imagePath;
 
   @override
   void initState() {
@@ -46,6 +50,7 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
     _category = _item.category;
     _priority = _item.priority;
     _notesCtrl = TextEditingController(text: _item.notes);
+    _imagePath = _item.imagePath.isNotEmpty ? _item.imagePath : null;
   }
 
   @override
@@ -66,13 +71,30 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
       notes: _notesCtrl.text.trim(),
       category: _category ?? '',
       priority: _priority,
+      imagePath: _imagePath ?? '',
     );
 
     InMemoryRepo.instance.updateItem(updated);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Item updated')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Item updated'),
+        duration: const Duration(milliseconds: 900),
+      ),
+    );
     Navigator.of(context).pop();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (picked != null) {
+        setState(() => _imagePath = picked.path);
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   Future<void> _onDelete() async {
@@ -97,9 +119,12 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
     if (!mounted) return;
     if (confirm == true) {
       InMemoryRepo.instance.deleteItem(_item.id);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Item deleted')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Item deleted'),
+          duration: const Duration(milliseconds: 900),
+        ),
+      );
       Navigator.of(context).pop();
     }
   }
@@ -178,6 +203,31 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
                   labelText: 'Notes (optional)',
                 ),
                 maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 26,
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage:
+                          (_imagePath != null && _imagePath!.isNotEmpty)
+                          ? FileImage(File(_imagePath!)) as ImageProvider
+                          : null,
+                      child: (_imagePath == null || _imagePath!.isEmpty)
+                          ? const Icon(Icons.image)
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  TextButton.icon(
+                    onPressed: _pickImage,
+                    icon: const Icon(Icons.photo_library),
+                    label: const Text('Change image'),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               const Text(

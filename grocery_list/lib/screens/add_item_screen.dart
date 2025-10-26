@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../models/item.dart';
 import '../services/in_memory_repo.dart';
 
-/// Add Item form with text fields, category dropdown and priority selector.
+// Add item form with text fields, category selector and priority.
 class AddItemScreen extends StatefulWidget {
   static const routeName = '/add';
   const AddItemScreen({super.key});
@@ -18,6 +20,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _quantityCtrl = TextEditingController(text: '1');
   final _priceCtrl = TextEditingController(text: '0.0');
   final _notesCtrl = TextEditingController();
+  String? _imagePath;
 
   String? _category;
   String _priority = 'Medium';
@@ -66,20 +69,42 @@ class _AddItemScreenState extends State<AddItemScreen> {
       notes: _notesCtrl.text.trim(),
       category: category,
       priority: priority,
+      imagePath: _imagePath ?? '',
     );
 
     try {
       InMemoryRepo.instance.addItem(item);
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Item added')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Item added'),
+          duration: const Duration(milliseconds: 900),
+        ),
+      );
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error saving item: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving item: $e'),
+          duration: const Duration(milliseconds: 900),
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (picked != null) {
+        setState(() {
+          _imagePath = picked.path;
+        });
+      }
+    } catch (e) {
+      // ignore picker errors for now
     }
   }
 
@@ -123,7 +148,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     );
                     InMemoryRepo.instance.addItem(item);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${item.name} added')),
+                      SnackBar(
+                        content: Text('${item.name} added'),
+                        duration: const Duration(milliseconds: 900),
+                      ),
                     );
                   }
 
@@ -149,10 +177,23 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
               const SizedBox(height: 12),
 
+              const Text(
+                'Add new',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+
               TextFormField(
                 controller: _nameCtrl,
                 focusNode: _nameFocus,
-                decoration: const InputDecoration(labelText: 'Item name'),
+                decoration: InputDecoration(
+                  labelText: 'Item name',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.image),
+                    onPressed: _pickImage,
+                    tooltip: 'Add image',
+                  ),
+                ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Enter item name' : null,
               ),
@@ -177,39 +218,30 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
               const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _quantityCtrl,
-                      decoration: const InputDecoration(labelText: 'Quantity'),
-                      keyboardType: TextInputType.number,
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Enter quantity';
-                        final n = int.tryParse(v);
-                        if (n == null || n < 1) return 'Enter valid quantity';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _priceCtrl,
-                      decoration: const InputDecoration(labelText: 'Price'),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (v) {
-                        if (v == null || v.isEmpty) return 'Enter price';
-                        final d = double.tryParse(v);
-                        if (d == null || d < 0) return 'Enter valid price';
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
+              // Quantity
+              TextFormField(
+                controller: _quantityCtrl,
+                decoration: const InputDecoration(labelText: 'Quantity'),
+                keyboardType: TextInputType.number,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Enter quantity';
+                  final n = int.tryParse(v);
+                  if (n == null || n < 1) return 'Enter valid quantity';
+                  return null;
+                },
               ),
+
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _notesCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                ),
+                maxLines: 2,
+              ),
+
+              const SizedBox(height: 12),
 
               const SizedBox(height: 12),
 
@@ -233,14 +265,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
 
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _notesCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
               ElevatedButton(onPressed: _save, child: const Text('Save')),
             ],
           ),

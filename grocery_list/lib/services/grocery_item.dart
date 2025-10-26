@@ -7,6 +7,7 @@ class GroceryItem {
   bool purchased;
   String priority; // e.g., 'Normal', 'Need Today'
   double? estimatedPrice; // optional
+  String? imagePath; // optional local path to image
 
   GroceryItem({
     this.id,
@@ -17,6 +18,7 @@ class GroceryItem {
     this.purchased = false,
     this.priority = 'Normal',
     this.estimatedPrice,
+    this.imagePath,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,6 +30,7 @@ class GroceryItem {
       'purchased': purchased ? 1 : 0,
       'priority': priority,
       'estimatedPrice': estimatedPrice,
+      'imagePath': imagePath,
     };
     if (id != null) map['id'] = id;
     return map;
@@ -45,6 +48,7 @@ class GroceryItem {
       estimatedPrice: map['estimatedPrice'] == null
           ? null
           : (map['estimatedPrice'] as num).toDouble(),
+      imagePath: map['imagePath'] as String?,
     );
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import '../utils/icon_mapper.dart';
 import '../models/item.dart';
 import '../services/in_memory_repo.dart';
 import 'edit_detail_screen.dart';
@@ -18,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _query = '';
   bool _showSearch = false;
   final TextEditingController _searchController = TextEditingController();
+  String? _selectedCategory;
 
   void _openAddItem() async {
     await Navigator.pushNamed(context, '/add');
@@ -124,129 +128,309 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 8),
+
+          // Categories header: title left and 'View all' on the right
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Categories',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                TextButton(
+                  onPressed: _openCategories,
+                  child: const Text('View all'),
+                ),
+              ],
+            ),
+          ),
+
+          // Horizontal category scroller
+          SizedBox(
+            height: 84,
+            child: ValueListenableBuilder<List<String>>(
+              valueListenable: InMemoryRepo.instance.categories,
+              builder: (context, cats, _) {
+                // ensure categories shown include those used by items
+                final allCats = <String>[];
+                allCats.addAll(cats);
+                allCats.sort(
+                  (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+                );
+                return ValueListenableBuilder<Map<String, String>>(
+                  valueListenable: InMemoryRepo.instance.categoryImages,
+                  builder: (context, catImgs, __) {
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      itemBuilder: (ctx, i) {
+                        final name = allCats[i];
+                        final selected = _selectedCategory == name;
+                        final img = catImgs[name];
+                        return GestureDetector(
+                          onTap: () => setState(() {
+                            if (_selectedCategory == name) {
+                              _selectedCategory = null;
+                            } else {
+                              _selectedCategory = name;
+                            }
+                          }),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 6,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CircleAvatar(
+                                  radius: 22,
+                                  backgroundColor: selected
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : Colors.grey.shade200,
+                                  backgroundImage:
+                                      (img != null && img.isNotEmpty)
+                                      ? FileImage(File(img))
+                                      : null,
+                                  child: (img == null || img.isEmpty)
+                                      ? Text(
+                                          // fallback to emoji mapper or first letter
+                                          (emojiForCategoryName(name) ??
+                                                  name.substring(0, 1))
+                                              .toString(),
+                                          style: const TextStyle(fontSize: 18),
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: selected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, __) => const SizedBox(width: 6),
+                      itemCount: allCats.length,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
           Expanded(
             child: ValueListenableBuilder<List<Item>>(
               valueListenable: InMemoryRepo.instance.items,
               builder: (context, list, _) {
-                final filtered = list
-                    .where(
-                      (it) =>
-                          it.name.toLowerCase().contains(_query.toLowerCase()),
-                    )
-                    .toList();
+                final filtered = list.where((it) {
+                  final matchesQuery = it.name.toLowerCase().contains(
+                    _query.toLowerCase(),
+                  );
+                  final matchesCategory =
+                      _selectedCategory == null || _selectedCategory!.isEmpty
+                      ? true
+                      : it.category.toLowerCase() ==
+                            _selectedCategory!.toLowerCase();
+                  return matchesQuery && matchesCategory;
+                }).toList();
                 if (filtered.isEmpty) {
                   return const Center(
                     child: Text('No items match your search.'),
                   );
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  itemBuilder: (ctx, i) {
-                    final it = filtered[i];
-                    final originalIndex = InMemoryRepo.instance.items.value
-                        .indexWhere((e) => e.id == it.id);
 
-                    return Dismissible(
-                      key: ValueKey('item-${it.id}'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        color: Colors.red,
-                        child: const Icon(
-                          Icons.delete,
-                          color: Color.fromARGB(255, 28, 28, 28),
-                        ),
+                // Title row: left = All items / All items — [Category], right = count
+                final title =
+                    (_selectedCategory == null || _selectedCategory!.isEmpty)
+                    ? 'All items'
+                    : 'All items — ${_selectedCategory!}';
+
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 8,
                       ),
-                      onDismissed: (direction) {
-                        InMemoryRepo.instance.deleteItem(it.id);
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${it.name} deleted'),
-                            action: SnackBarAction(
-                              label: 'Undo',
-                              onPressed: () => InMemoryRepo.instance
-                                  .restoreItem(it, index: originalIndex),
-                            ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
-                        );
-                      },
-                      child: ListTile(
-                        leading: Checkbox(
-                          value: it.purchased,
-                          onChanged: (_) =>
-                              InMemoryRepo.instance.togglePurchased(it.id),
-                        ),
-                        title: AnimatedDefaultTextStyle(
-                          style: it.purchased
-                              ? TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  color:
-                                      Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.color
-                                          ?.withAlpha((0.6 * 255).round()) ??
-                                      Colors.grey,
-                                )
-                              : TextStyle(
-                                  decoration: TextDecoration.none,
-                                  color: Theme.of(
-                                    context,
-                                  ).textTheme.bodyLarge?.color,
-                                ),
-                          duration: const Duration(milliseconds: 200),
-                          child: Row(
-                            children: [
-                              PriorityIndicator(priority: it.priority),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(it.name)),
-                            ],
-                          ),
-                        ),
-                        subtitle: AnimatedOpacity(
-                          opacity: it.purchased ? 0.5 : 1.0,
-                          duration: const Duration(milliseconds: 200),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Qty: ${it.quantity}  •  \$${it.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).textTheme.bodyMedium?.color,
-                                ),
+                          Text('${filtered.length}'),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        itemBuilder: (ctx, i) {
+                          final it = filtered[i];
+                          final originalIndex = InMemoryRepo
+                              .instance
+                              .items
+                              .value
+                              .indexWhere((e) => e.id == it.id);
+
+                          return Dismissible(
+                            key: ValueKey('item-${it.id}'),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              color: Colors.red,
+                              child: const Icon(
+                                Icons.delete,
+                                color: Color.fromARGB(255, 28, 28, 28),
                               ),
-                              if (it.notes.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(
-                                    it.notes,
-                                    style: TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                      color: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall?.color,
-                                    ),
+                            ),
+                            onDismissed: (direction) {
+                              InMemoryRepo.instance.deleteItem(it.id);
+                              ScaffoldMessenger.of(context).clearSnackBars();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${it.name} deleted'),
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () => InMemoryRepo.instance
+                                        .restoreItem(it, index: originalIndex),
                                   ),
                                 ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _openEdit(it),
-                        ),
-                        onTap: () => _openEdit(it),
+                              );
+                            },
+                            child: ListTile(
+                              leading: Checkbox(
+                                value: it.purchased,
+                                onChanged: (_) => InMemoryRepo.instance
+                                    .togglePurchased(it.id),
+                              ),
+                              title: AnimatedDefaultTextStyle(
+                                style: it.purchased
+                                    ? TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                        color:
+                                            Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge
+                                                ?.color
+                                                ?.withAlpha(
+                                                  (0.6 * 255).round(),
+                                                ) ??
+                                            Colors.grey,
+                                      )
+                                    : TextStyle(
+                                        decoration: TextDecoration.none,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                      ),
+                                duration: const Duration(milliseconds: 200),
+                                child: Row(
+                                  children: [
+                                    // thumbnail if available, otherwise emoji icon based on name
+                                    if (it.imagePath.isNotEmpty) ...[
+                                      CircleAvatar(
+                                        radius: 12,
+                                        backgroundImage: FileImage(
+                                          File(it.imagePath),
+                                        ),
+                                        backgroundColor: Colors.grey.shade200,
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ] else ...[
+                                      Builder(
+                                        builder: (_) {
+                                          final emoji = emojiForItemName(
+                                            it.name,
+                                          );
+                                          if (emoji != null) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 8.0,
+                                              ),
+                                              child: CircleAvatar(
+                                                radius: 12,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                child: Text(
+                                                  emoji,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                    ],
+                                    PriorityIndicator(priority: it.priority),
+                                    const SizedBox(width: 8),
+                                    Expanded(child: Text(it.name)),
+                                  ],
+                                ),
+                              ),
+                              subtitle: AnimatedOpacity(
+                                opacity: it.purchased ? 0.5 : 1.0,
+                                duration: const Duration(milliseconds: 200),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Qty: ${it.quantity}  •  \$${it.price.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium?.color,
+                                      ),
+                                    ),
+                                    if (it.notes.isNotEmpty) ...[
+                                      const SizedBox(height: 6),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 8.0,
+                                        ),
+                                        child: Text(
+                                          it.notes,
+                                          style: TextStyle(
+                                            fontStyle: FontStyle.italic,
+                                            color: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall?.color,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () => _openEdit(it),
+                              ),
+                              onTap: () => _openEdit(it),
+                            ),
+                          );
+                        },
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemCount: filtered.length,
                       ),
-                    );
-                  },
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemCount: filtered.length,
+                    ),
+                  ],
                 );
               },
             ),

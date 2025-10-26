@@ -32,12 +32,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
 
-    if (confirmed == true) {
+      if (confirmed == true) {
       // Perform a destructive clear of DB and in-memory caches.
       await InMemoryRepo.instance.clearAllData();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('All data cleared (persistent)')),
+        SnackBar(
+          content: const Text('All data cleared (persistent)'),
+          duration: const Duration(milliseconds: 900),
+        ),
       );
     }
   }
@@ -67,7 +70,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await SettingsService.instance.resetToDefaults();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Settings reset to defaults (mock)')),
+        SnackBar(
+          content: const Text('Settings reset to defaults (mock)'),
+          duration: const Duration(milliseconds: 900),
+        ),
       );
     }
   }

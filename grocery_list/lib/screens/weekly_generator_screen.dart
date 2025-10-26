@@ -4,10 +4,7 @@ import '../models/weekly_plan.dart';
 import '../services/in_memory_repo.dart';
 import '../models/item.dart';
 
-/// Simple weekly generator MVP. Uses in-memory items and item priority/price
-/// to propose a short weekly shopping list. This is intentionally lightweight
-/// and will be improved later with saved templates, pantry-awareness, and
-/// recipe-based generation.
+// Simple weekly generator MVP that proposes a short weekly shopping list.
 class WeeklyGeneratorScreen extends StatefulWidget {
   static const routeName = '/weekly-generator';
   const WeeklyGeneratorScreen({super.key});
@@ -127,9 +124,12 @@ class _WeeklyGeneratorScreenState extends State<WeeklyGeneratorScreen> {
 
     await InMemoryRepo.instance.saveTemplate(name, data);
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Template saved')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Template saved'),
+        duration: const Duration(milliseconds: 900),
+      ),
+    );
   }
 
   Widget _buildControls(BoxConstraints constraints) {
