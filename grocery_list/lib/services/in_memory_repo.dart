@@ -127,6 +127,32 @@ class InMemoryRepo {
     _nextId = 1;
   }
 
+  /// Clears both the in-memory caches and persistent storage (items & templates).
+  /// This performs a destructive reset of user data.
+  Future<void> clearAllData() async {
+    try {
+      final db = DBHelper();
+      await db.clearAll();
+    } catch (e) {
+      if (kDebugMode) print('Failed to clear DB: $e');
+    }
+
+    // Reset in-memory lists
+    items.value = [];
+    templates.value = [];
+    // Reset categories to defaults
+    categories.value = [
+      'Fruits',
+      'Vegetables',
+      'Dairy',
+      'Bakery',
+      'Pantry',
+      'Protein',
+      'Frozen',
+    ];
+    _nextId = 1;
+  }
+
   /// Restore an item with its original id. If [index] is provided, insert at that
   /// position; otherwise insert at the front. Also ensures _nextId stays ahead
   /// of restored ids.

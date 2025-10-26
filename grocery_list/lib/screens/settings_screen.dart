@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/settings_service.dart';
+import '../services/in_memory_repo.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = '/settings';
@@ -32,10 +33,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirmed == true) {
-      // Frontend-only: show snackbar. Replace with DB clear logic if desired.
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('All data cleared (mock)')));
+        // Perform a destructive clear of DB and in-memory caches.
+        await InMemoryRepo.instance.clearAllData();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All data cleared (persistent)')),
+        );
     }
   }
 
@@ -62,6 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (confirmed == true) {
       await SettingsService.instance.resetToDefaults();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Settings reset to defaults (mock)')),
       );

@@ -113,6 +113,8 @@ class DBHelper {
 
   Future<void> clearAll() async {
     final db = await database;
+    // remove all rows from items and templates to perform a full clear
     await db.delete('items');
+    await db.delete('templates');
   }
 }

@@ -16,6 +16,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _query = '';
+  bool _showSearch = false;
+  final TextEditingController _searchController = TextEditingController();
 
   void _openAddItem() async {
     await Navigator.pushNamed(context, '/add');
@@ -36,22 +38,64 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _searchController.text = _query;
+    _searchController.addListener(() {
+      setState(() {
+        _query = _searchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: _showSearch
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => setState(() {
+                  _showSearch = false;
+                  _searchController.clear();
+                }),
+              ),
+              title: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search',
+                  border: InputBorder.none,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => setState(() {
+                    _showSearch = false;
+                    _searchController.clear();
+                  }),
+                ),
+              ],
+            )
+          : AppBar(
+              title: const Text('Home'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () => setState(() => _showSearch = true),
+                ),
+              ],
+            ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              decoration: const InputDecoration(
-                labelText: 'Search',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (v) => setState(() => _query = v),
-            ),
-          ),
+          // Search field moved to AppBar and only appears when _showSearch is true.
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
