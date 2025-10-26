@@ -183,12 +183,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? TextStyle(
                                   decoration: TextDecoration.lineThrough,
                                   color:
-                        Theme.of(context)
-                              .textTheme
-                              .bodyLarge
-                              ?.color
-                              ?.withAlpha((0.6 * 255).round()) ??
-                            Colors.grey,
+                                      Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.color
+                                          ?.withAlpha((0.6 * 255).round()) ??
+                                      Colors.grey,
                                 )
                               : TextStyle(
                                   decoration: TextDecoration.none,
