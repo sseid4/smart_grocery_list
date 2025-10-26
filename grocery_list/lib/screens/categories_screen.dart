@@ -104,63 +104,99 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
  @override
  Widget build(BuildContext context) {
-   return Scaffold(
-     appBar: AppBar(title: const Text('Categories')),
-     body: ListView.separated(
-       padding: const EdgeInsets.all(12),
-       itemCount: _categories.length,
-       itemBuilder: (ctx, i) {
-         final name = _categories[i];
-         return ListTile(
-           title: Text(name),
-           trailing: PopupMenuButton<String>(
-             onSelected: (value) {
-               if (value == 'rename') {
-                 _showRenameDialog(i);
-               } else if (value == 'delete') {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Categories')),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 600;
 
-                 showDialog<bool>(
-                   context: context,
-                   builder: (c) => AlertDialog(
-                     title: const Text('Delete category'),
-                     content: Text(
-                       'Delete "$name"? This will not remove items automatically.',
-                     ),
-                     actions: [
-                       TextButton(
-                         onPressed: () => Navigator.of(c).pop(false),
-                         child: const Text('Cancel'),
-                       ),
-                       ElevatedButton(
-                         onPressed: () => Navigator.of(c).pop(true),
-                         child: const Text('Delete'),
-                       ),
-                     ],
-                   ),
-                 ).then((confirmed) {
-                   if (confirmed == true) _deleteCategory(i);
-                 });
-               }
-             },
-             itemBuilder: (_) => const [
-               PopupMenuItem(value: 'rename', child: Text('Rename')),
-               PopupMenuItem(value: 'delete', child: Text('Delete')),
-             ],
-           ),
-           onTap: () {
-             ScaffoldMessenger.of(
-               context,
-             ).showSnackBar(SnackBar(content: Text('Open category: $name')));
-           },
-         );
-       },
-       separatorBuilder: (_, __) => const Divider(height: 1),
-     ),
-     floatingActionButton: FloatingActionButton.extended(
-       onPressed: _showAddDialog,
-       icon: const Icon(Icons.add),
-       label: const Text('Add Category'),
-     ),
-   );
+          Widget chipsPanel = Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _categories.map((c) {
+                return GestureDetector(
+                  onLongPress: () {
+                    final idx = _categories.indexOf(c);
+                    _showRenameDialog(idx);
+                  },
+                  child: ActionChip(
+                    label: Text(c),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Filter by: $c')));
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+
+          Widget listPanel = Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.all(12),
+              itemCount: _categories.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (ctx, i) {
+                final name = _categories[i];
+                return ListTile(
+                  title: Text(name),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'rename') {
+                        _showRenameDialog(i);
+                      } else if (value == 'delete') {
+                        showDialog<bool>(
+                          context: context,
+                          builder: (c) => AlertDialog(
+                            title: const Text('Delete category'),
+                            content: Text('Delete "$name"? This will not remove items automatically.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.of(c).pop(false), child: const Text('Cancel')),
+                              ElevatedButton(onPressed: () => Navigator.of(c).pop(true), child: const Text('Delete')),
+                            ],
+                          ),
+                        ).then((confirmed) {
+                          if (confirmed == true) _deleteCategory(i);
+                        });
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(value: 'rename', child: Text('Rename')),
+                      PopupMenuItem(value: 'delete', child: Text('Delete')),
+                    ],
+                  ),
+                );
+              },
+            ),
+          );
+
+          if (isWide) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: constraints.maxWidth * 0.45, child: chipsPanel),
+                const VerticalDivider(width: 1),
+                Expanded(child: listPanel),
+              ],
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              chipsPanel,
+              const Divider(height: 1),
+              Expanded(child: listPanel),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showAddDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Category'),
+      ),
+    );
  }
 }

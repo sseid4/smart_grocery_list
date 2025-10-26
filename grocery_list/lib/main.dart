@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_item_screen.dart';
+import 'screens/categories_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/weekly_generator_screen.dart';
 import 'services/in_memory_repo.dart';
 
 Future<void> main() async {
@@ -21,7 +24,12 @@ class SmartGroceryApp extends StatelessWidget {
       title: 'Smart Grocery',
       theme: ThemeData(primarySwatch: Colors.green, useMaterial3: true),
       home: const HomeScreen(),
-      routes: {'/add': (ctx) => const AddItemScreen()},
+      routes: {
+        '/add': (ctx) => const AddItemScreen(),
+        CategoriesScreen.routeName: (ctx) => const CategoriesScreen(),
+        SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+        WeeklyGeneratorScreen.routeName: (ctx) => const WeeklyGeneratorScreen(),
+      },
     );
   }
 }
