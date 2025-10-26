@@ -5,12 +5,15 @@ import 'screens/categories_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/weekly_generator_screen.dart';
 import 'services/in_memory_repo.dart';
+import 'screens/templates_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Load items from SQLite into the in-memory repo before starting the app.
   await InMemoryRepo.instance.loadFromDb();
+  // Load saved templates as well
+  await InMemoryRepo.instance.loadTemplatesFromDb();
 
   runApp(const SmartGroceryApp());
 }
@@ -29,6 +32,7 @@ class SmartGroceryApp extends StatelessWidget {
         CategoriesScreen.routeName: (ctx) => const CategoriesScreen(),
         SettingsScreen.routeName: (ctx) => const SettingsScreen(),
         WeeklyGeneratorScreen.routeName: (ctx) => const WeeklyGeneratorScreen(),
+        TemplatesScreen.routeName: (ctx) => const TemplatesScreen(),
       },
     );
   }

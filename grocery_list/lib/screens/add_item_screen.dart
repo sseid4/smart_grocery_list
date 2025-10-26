@@ -21,32 +21,31 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String? _category;
   String _priority = 'Medium';
 
-
   static const List<String> _priorities = ['High', 'Medium', 'Low'];
 
   // Quick-add presets for commonly used items. Tapping one will immediately
   // add it to the repo with default values so users can add common items fast.
   static const List<Map<String, dynamic>> _quickItems = [
-    {'name': 'Milk', 'category': 'Dairy', 'price': 1.5},
-    {'name': 'Eggs', 'category': 'Dairy', 'price': 2.0},
-    {'name': 'Bread', 'category': 'Bakery', 'price': 1.8},
-    {'name': 'Bananas', 'category': 'Fruits', 'price': 0.4},
-    {'name': 'Apples', 'category': 'Fruits', 'price': 0.6},
-    {'name': 'Tomatoes', 'category': 'Vegetables', 'price': 1.2},
-    {'name': 'Potatoes', 'category': 'Vegetables', 'price': 0.9},
-    {'name': 'Onions', 'category': 'Vegetables', 'price': 0.7},
-    {'name': 'Chicken', 'category': 'Meat', 'price': 5.0},
-    {'name': 'Rice', 'category': 'Pantry', 'price': 2.5},
-    {'name': 'Pasta', 'category': 'Pantry', 'price': 1.6},
-    {'name': 'Cheese', 'category': 'Dairy', 'price': 3.0},
-    {'name': 'Butter', 'category': 'Dairy', 'price': 2.2},
-    {'name': 'Yogurt', 'category': 'Dairy', 'price': 1.0},
+    {'name': 'Milk', 'category': 'Dairy', 'price': 3.5},
+    {'name': 'Eggs', 'category': 'Protein', 'price': 5.0},
+    {'name': 'Bread', 'category': 'Bakery', 'price': 2.8},
+    {'name': 'Bananas', 'category': 'Fruits', 'price': 1.4},
+    {'name': 'Apples', 'category': 'Fruits', 'price': 1.6},
+    {'name': 'Tomatoes', 'category': 'Vegetables', 'price': 2.2},
+    {'name': 'Potatoes', 'category': 'Vegetables', 'price': 2.9},
+    {'name': 'Onions', 'category': 'Vegetables', 'price': 1.7},
+    {'name': 'Chicken', 'category': 'Protein', 'price': 7.0},
+    {'name': 'Rice', 'category': 'Pantry', 'price': 3.5},
+    {'name': 'Pasta', 'category': 'Pantry', 'price': 2.6},
+    {'name': 'Cheese', 'category': 'Dairy', 'price': 5.0},
+    {'name': 'Butter', 'category': 'Dairy', 'price': 4.2},
+    {'name': 'Yogurt', 'category': 'Dairy', 'price': 6.0},
     {'name': 'Cereal', 'category': 'Pantry', 'price': 3.5},
     {'name': 'Coffee', 'category': 'Pantry', 'price': 6.0},
     {'name': 'Tea', 'category': 'Pantry', 'price': 3.0},
     {'name': 'Sugar', 'category': 'Pantry', 'price': 1.2},
-    {'name': 'Flour', 'category': 'Pantry', 'price': 1.5},
-    {'name': 'Olive oil', 'category': 'Pantry', 'price': 7.0},
+    {'name': 'Flour', 'category': 'Pantry', 'price': 5.5},
+    {'name': 'Olive oil', 'category': 'Pantry', 'price': 11.0},
   ];
 
   Future<void> _save() async {
@@ -162,7 +161,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 builder: (context, cats, _) {
                   final value = (cats.contains(_category)) ? _category : null;
                   return DropdownButtonFormField<String>(
-                    value: value,
+                    initialValue: value,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: cats
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))

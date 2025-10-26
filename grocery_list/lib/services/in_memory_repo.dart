@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/item.dart';
 import 'db_helper.dart';
 import 'grocery_item.dart';
+import '../models/weekly_template.dart';
 
 class InMemoryRepo {
   InMemoryRepo._init();
@@ -14,9 +15,12 @@ class InMemoryRepo {
     'Dairy',
     'Bakery',
     'Pantry',
-    'Meat',
+    'Protein',
     'Frozen',
   ]);
+  final ValueNotifier<List<dynamic>> templates = ValueNotifier<List<dynamic>>(
+    [],
+  );
   int _nextId = 1;
 
   List<Item> get all => List.unmodifiable(items.value);
@@ -134,5 +138,39 @@ class InMemoryRepo {
         : index;
     list.insert(insertPos, item);
     items.value = list;
+  }
+
+  /// Templates: load from DB into in-memory notifier
+  Future<void> loadTemplatesFromDb() async {
+    try {
+      final db = DBHelper();
+      final rows = await db.getAllTemplates();
+      templates.value = rows;
+    } catch (e) {
+      if (kDebugMode) print('Failed loading templates: $e');
+    }
+  }
+
+  Future<int> saveTemplate(
+    String name,
+    Map<String, dynamic> planData, {
+    String? description,
+  }) async {
+    final tpl = WeeklyPlanTemplate(
+      name: name,
+      description: description,
+      planData: planData,
+    );
+    final db = DBHelper();
+    final id = await db.insertTemplate(tpl);
+    // refresh in-memory cache
+    await loadTemplatesFromDb();
+    return id;
+  }
+
+  Future<void> deleteTemplateById(int id) async {
+    final db = DBHelper();
+    await db.deleteTemplate(id);
+    await loadTemplatesFromDb();
   }
 }

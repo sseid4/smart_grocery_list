@@ -82,11 +82,54 @@ class _WeeklyGeneratorScreenState extends State<WeeklyGeneratorScreen> {
     });
   }
 
-  void _saveTemplate() {
-    // For MVP we keep saved templates in-memory; persistence will be added later.
+  Future<void> _saveTemplate() async {
+    final ctrl = TextEditingController(text: '$_preset plan');
+    final name = await showDialog<String?>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Save template'),
+        content: TextField(
+          controller: ctrl,
+          decoration: const InputDecoration(labelText: 'Template name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (name == null || name.isEmpty) return;
+    if (_lastPlan == null) return;
+
+    final plan = _lastPlan!;
+    final data = {
+      'name': plan.name,
+      'createdAt': plan.createdAt.toIso8601String(),
+      'items': plan.items
+          .map(
+            (p) => {
+              'name': p.item.name,
+              'quantity': p.quantity,
+              'price': p.item.price,
+              'category': p.item.category,
+              'priority': p.item.priority,
+            },
+          )
+          .toList(),
+    };
+
+    await InMemoryRepo.instance.saveTemplate(name, data);
+    if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Plan saved (in-memory)')));
+    ).showSnackBar(const SnackBar(content: Text('Template saved')));
   }
 
   Widget _buildControls(BoxConstraints constraints) {
@@ -103,7 +146,7 @@ class _WeeklyGeneratorScreenState extends State<WeeklyGeneratorScreen> {
           const Text('Pick a preset and limits to guide the generator.'),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _preset,
+            initialValue: _preset,
             items: const [
               DropdownMenuItem(value: 'Balanced', child: Text('Balanced')),
               DropdownMenuItem(value: 'Low-cost', child: Text('Low-cost')),
@@ -150,12 +193,23 @@ class _WeeklyGeneratorScreenState extends State<WeeklyGeneratorScreen> {
             label: const Text('Generate Weekly List'),
           ),
           const SizedBox(height: 8),
-          if (_lastPlan != null)
-            ElevatedButton.icon(
-              onPressed: _saveTemplate,
-              icon: const Icon(Icons.save),
-              label: const Text('Save Template'),
-            ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              if (_lastPlan != null)
+                ElevatedButton.icon(
+                  onPressed: _saveTemplate,
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save Template'),
+                ),
+              const SizedBox(width: 12),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/templates'),
+                icon: const Icon(Icons.list),
+                label: const Text('Templates'),
+              ),
+            ],
+          ),
         ],
       ),
     );

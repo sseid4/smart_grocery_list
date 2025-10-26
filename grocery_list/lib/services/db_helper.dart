@@ -1,8 +1,9 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'grocery_item.dart';
+import '../models/weekly_template.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+// dart:convert not needed here
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
@@ -22,8 +23,23 @@ class DBHelper {
     final path = join(documentsDirectory.path, fileName);
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: (db, oldV, newV) async {
+        if (oldV < 2) {
+          // create templates table
+          await db.execute('''
+            CREATE TABLE templates (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              description TEXT,
+              created_at INTEGER,
+              updated_at INTEGER,
+              data TEXT NOT NULL
+            )
+          ''');
+        }
+      },
     );
   }
 
@@ -40,6 +56,33 @@ class DBHelper {
         estimatedPrice REAL
       )
     ''');
+    // templates table
+    await db.execute('''
+      CREATE TABLE templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT,
+        created_at INTEGER,
+        updated_at INTEGER,
+        data TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<int> insertTemplate(WeeklyPlanTemplate template) async {
+    final db = await database;
+    return await db.insert('templates', template.toMap());
+  }
+
+  Future<List<WeeklyPlanTemplate>> getAllTemplates() async {
+    final db = await database;
+    final res = await db.query('templates', orderBy: 'created_at DESC');
+    return res.map((r) => WeeklyPlanTemplate.fromMap(r)).toList();
+  }
+
+  Future<int> deleteTemplate(int id) async {
+    final db = await database;
+    return await db.delete('templates', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<int> insertItem(GroceryItem item) async {

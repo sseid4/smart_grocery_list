@@ -1,229 +1,217 @@
 import 'package:flutter/material.dart';
 
-
 import '../models/item.dart';
 import '../services/in_memory_repo.dart';
 
-
 /// Editable item view with Update and Delete actions.
 class EditDetailScreen extends StatefulWidget {
- static const routeName = '/edit-detail';
- final Item? item;
+  static const routeName = '/edit-detail';
+  final Item? item;
 
+  const EditDetailScreen({super.key, this.item});
 
- const EditDetailScreen({super.key, this.item});
-
-
- @override
- State<EditDetailScreen> createState() => _EditDetailScreenState();
+  @override
+  State<EditDetailScreen> createState() => _EditDetailScreenState();
 }
 
 class _EditDetailScreenState extends State<EditDetailScreen> {
- final _formKey = GlobalKey<FormState>();
- late TextEditingController _nameCtrl;
- late TextEditingController _quantityCtrl;
- late TextEditingController _priceCtrl;
- String? _category;
- String _priority = 'Medium';
- 
- 
- static const List<String> _priorities = ['High', 'Medium', 'Low'];
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameCtrl;
+  late TextEditingController _quantityCtrl;
+  late TextEditingController _priceCtrl;
+  String? _category;
+  String _priority = 'Medium';
 
+  static const List<String> _priorities = ['High', 'Medium', 'Low'];
 
- late Item _item;
+  late Item _item;
 
- @override
- void initState() {
-   super.initState();
-   _item =
-       widget.item ??
-       Item(
-         id: 1,
-         name: 'Mock Item',
-         quantity: 2,
-         price: 1.99,
-         category: 'Pantry',
-       );
+  @override
+  void initState() {
+    super.initState();
+    _item =
+        widget.item ??
+        Item(
+          id: 1,
+          name: 'Mock Item',
+          quantity: 2,
+          price: 1.99,
+          category: 'Pantry',
+        );
 
+    _nameCtrl = TextEditingController(text: _item.name);
+    _quantityCtrl = TextEditingController(text: _item.quantity.toString());
+    _priceCtrl = TextEditingController(text: _item.price.toString());
+    _category = _item.category;
+    _priority = _item.priority;
+  }
 
-   _nameCtrl = TextEditingController(text: _item.name);
-   _quantityCtrl = TextEditingController(text: _item.quantity.toString());
-   _priceCtrl = TextEditingController(text: _item.price.toString());
-   _category = _item.category;
-   _priority = _item.priority;
- }
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _quantityCtrl.dispose();
+    _priceCtrl.dispose();
+    super.dispose();
+  }
 
+  void _onUpdate() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final updated = _item.copyWith(
+      name: _nameCtrl.text.trim(),
+      quantity: int.tryParse(_quantityCtrl.text) ?? 1,
+      price: double.tryParse(_priceCtrl.text) ?? 0.0,
+      category: _category ?? '',
+      priority: _priority,
+    );
 
- @override
- void dispose() {
-   _nameCtrl.dispose();
-   _quantityCtrl.dispose();
-   _priceCtrl.dispose();
-   super.dispose();
- }
+    InMemoryRepo.instance.updateItem(updated);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Item updated')));
+    Navigator.of(context).pop();
+  }
 
+  Future<void> _onDelete() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete item'),
+        content: const Text('Are you sure you want to delete this item?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
 
- void _onUpdate() {
-   if (!(_formKey.currentState?.validate() ?? false)) return;
-   final updated = _item.copyWith(
-     name: _nameCtrl.text.trim(),
-     quantity: int.tryParse(_quantityCtrl.text) ?? 1,
-     price: double.tryParse(_priceCtrl.text) ?? 0.0,
-     category: _category ?? '',
-     priority: _priority,
-   );
+    if (!mounted) return;
+    if (confirm == true) {
+      InMemoryRepo.instance.deleteItem(_item.id);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Item deleted')));
+      Navigator.of(context).pop();
+    }
+  }
 
-
-   InMemoryRepo.instance.updateItem(updated);
-   ScaffoldMessenger.of(
-     context,
-   ).showSnackBar(const SnackBar(content: Text('Item updated')));
-   Navigator.of(context).pop();
- }
-
-
- Future<void> _onDelete() async {
-   final confirm = await showDialog<bool>(
-     context: context,
-     builder: (ctx) => AlertDialog(
-       title: const Text('Delete item'),
-       content: const Text('Are you sure you want to delete this item?'),
-       actions: [
-         TextButton(
-           onPressed: () => Navigator.of(ctx).pop(false),
-           child: const Text('Cancel'),
-         ),
-         TextButton(
-           onPressed: () => Navigator.of(ctx).pop(true),
-           child: const Text('Delete'),
-         ),
-       ],
-     ),
-   );
-
-
-   if (confirm == true) {
-     InMemoryRepo.instance.deleteItem(_item.id);
-     ScaffoldMessenger.of(
-       context,
-     ).showSnackBar(const SnackBar(content: Text('Item deleted')));
-     Navigator.of(context).pop();
-   }
- }
-
-
- @override
- Widget build(BuildContext context) {
-   return Scaffold(
-     appBar: AppBar(title: const Text('Edit / Detail')),
-     body: Padding(
-       padding: const EdgeInsets.all(16.0),
-       child: Form(
-         key: _formKey,
-         child: ListView(
-           children: [
-             TextFormField(
-               controller: _nameCtrl,
-               decoration: const InputDecoration(labelText: 'Name'),
-               validator: (v) =>
-                   (v == null || v.trim().isEmpty) ? 'Enter a name' : null,
-             ),
-             const SizedBox(height: 12),
-             ValueListenableBuilder<List<String>>(
-               valueListenable: InMemoryRepo.instance.categories,
-               builder: (context, cats, _) {
-                 final value = (cats.contains(_category)) ? _category : null;
-                 return DropdownButtonFormField<String>(
-                   value: value,
-                   decoration: const InputDecoration(labelText: 'Category'),
-                   items: cats
-                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                       .toList(),
-                   onChanged: (v) => setState(() => _category = v),
-                   validator: (v) =>
-                       (v == null || v.isEmpty) ? 'Select a category' : null,
-                 );
-               },
-             ),
-             const SizedBox(height: 12),
-             Row(
-               children: [
-                 Expanded(
-                   child: TextFormField(
-                     controller: _quantityCtrl,
-                     decoration: const InputDecoration(labelText: 'Quantity'),
-                     keyboardType: TextInputType.number,
-                     validator: (v) {
-                       if (v == null || v.isEmpty) return 'Enter a quantity';
-                       final n = int.tryParse(v);
-                       if (n == null || n < 1) return 'Enter valid quantity';
-                       return null;
-                     },
-                   ),
-                 ),
-                 const SizedBox(width: 12),
-                 Expanded(
-                   child: TextFormField(
-                     controller: _priceCtrl,
-                     decoration: const InputDecoration(labelText: 'Price'),
-                     keyboardType: const TextInputType.numberWithOptions(
-                       decimal: true,
-                     ),
-                     validator: (v) {
-                       if (v == null || v.isEmpty) return 'Enter a price';
-                       final d = double.tryParse(v);
-                       if (d == null || d < 0) return 'Enter valid price';
-                       return null;
-                     },
-                   ),
-                 ),
-               ],
-             ),
-             const SizedBox(height: 12),
-             const Text(
-               'Priority',
-               style: TextStyle(fontWeight: FontWeight.bold),
-             ),
-             Column(
-               children: _priorities
-                   .map(
-                     (p) => RadioListTile<String>(
-                       title: Text(p),
-                       value: p,
-                       groupValue: _priority,
-                       onChanged: (v) =>
-                           setState(() => _priority = v ?? 'Medium'),
-                     ),
-                   )
-                   .toList(),
-             ),
-             const SizedBox(height: 20),
-             Row(
-               children: [
-                 Expanded(
-                   child: ElevatedButton.icon(
-                     onPressed: _onUpdate,
-                     icon: const Icon(Icons.save),
-                     label: const Text('Update'),
-                   ),
-                 ),
-                 const SizedBox(width: 12),
-                 Expanded(
-                   child: ElevatedButton.icon(
-                     style: ElevatedButton.styleFrom(
-                       backgroundColor: Colors.red,
-                     ),
-                     onPressed: _onDelete,
-                     icon: const Icon(Icons.delete),
-                     label: const Text('Delete'),
-                   ),
-                 ),
-               ],
-             ),
-           ],
-         ),
-       ),
-     ),
-   );
- }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit / Detail')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Enter a name' : null,
+              ),
+              const SizedBox(height: 12),
+              ValueListenableBuilder<List<String>>(
+                valueListenable: InMemoryRepo.instance.categories,
+                builder: (context, cats, _) {
+                  final value = (cats.contains(_category)) ? _category : null;
+                  return DropdownButtonFormField<String>(
+                    initialValue: value,
+                    decoration: const InputDecoration(labelText: 'Category'),
+                    items: cats
+                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _category = v),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Select a category' : null,
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _quantityCtrl,
+                      decoration: const InputDecoration(labelText: 'Quantity'),
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Enter a quantity';
+                        final n = int.tryParse(v);
+                        if (n == null || n < 1) return 'Enter valid quantity';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _priceCtrl,
+                      decoration: const InputDecoration(labelText: 'Price'),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Enter a price';
+                        final d = double.tryParse(v);
+                        if (d == null || d < 0) return 'Enter valid price';
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Priority',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Column(
+                children: _priorities
+                    .map(
+                      (p) => RadioListTile<String>(
+                        title: Text(p),
+                        value: p,
+                        groupValue: _priority,
+                        onChanged: (v) =>
+                            setState(() => _priority = v ?? 'Medium'),
+                      ),
+                    )
+                    .toList(),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _onUpdate,
+                      icon: const Icon(Icons.save),
+                      label: const Text('Update'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: _onDelete,
+                      icon: const Icon(Icons.delete),
+                      label: const Text('Delete'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
