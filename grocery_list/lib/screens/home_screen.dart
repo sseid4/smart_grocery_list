@@ -61,7 +61,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar( //moved settings button to appbar
+        title: const Text('Home'),
+        actions: [
+          IconButton(
+            onPressed: _openSettings,
+            icon: const Icon(Icons.settings),
+          ),
+        ],
+      ),
+
       body: Column(
         children: [
           // Search field moved to AppBar and only appears when _showSearch is true.
@@ -85,10 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.calendar_today),
                   label: const Text('Weekly'),
                 ),
-                IconButton(
-                  onPressed: _openSettings,
-                  icon: const Icon(Icons.settings),
-                ),
+                
               ],
             ),
           ),
