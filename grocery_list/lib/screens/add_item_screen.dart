@@ -158,7 +158,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
              const SizedBox(height: 12),
 
 
-             // Priority selector as radio buttons
+             
              const Text(
                'Priority',
                style: TextStyle(fontWeight: FontWeight.bold),
