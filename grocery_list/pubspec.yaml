@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^6.0.5
   sqflite: ^2.2.8+4
   path_provider: ^2.0.15
   path: ^1.8.3

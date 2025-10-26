@@ -1,16 +1,28 @@
-# grocery_list
+# Smart Grocery List
 
-A new Flutter project.
+A lightweight Flutter app to build and manage grocery lists, grouped by categories, with a weekly generator and template saving.
 
-## Getting Started
+Features
+ - Add, edit and delete grocery items (quantity, price, category, priority)
+ - Quick-add presets for common items
+ - Categories screen with expandable lists
+ - Weekly generator with saveable templates
+ - Persistent storage for items and templates (SQLite)
+ - Persisted settings (dark mode, notifications) via SharedPreferences
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+Architecture notes
+ - `lib/services/db_helper.dart` — SQLite helper and schema
+ - `lib/services/in_memory_repo.dart` — in-memory cache using `ValueNotifier` and convenience methods. Loads items/templates from DB on startup.
+ - `lib/services/settings_service.dart` — SharedPreferences-backed settings exposed via `ValueNotifier`
+ - `lib/screens/*` — Screens for Home, Add/Edit, Categories, Weekly generator, Templates, Settings
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Persistence
+ - Items and templates are persisted in `smart_grocery.db` (app documents directory).
+ - Settings are saved in SharedPreferences.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Notes
+ - The project uses a ValueNotifier-based in-memory store for simplicity. If you prefer a more structured state-management approach, migrating to Provider/ChangeNotifier or Riverpod is straightforward.
+ - Running `flutter analyze` will show a few informational lints about deprecated APIs (some widgets migrated away from deprecated Radio APIs).
+
+If you'd like, I can add a CONTRIBUTING.md, a CHANGELOG.md, or CI configuration next.

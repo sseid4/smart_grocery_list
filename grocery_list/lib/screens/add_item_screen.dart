@@ -214,18 +214,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 'Priority',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Column(
-                children: _priorities
-                    .map(
-                      (p) => RadioListTile<String>(
-                        title: Text(p),
-                        value: p,
-                        groupValue: _priority,
-                        onChanged: (v) =>
-                            setState(() => _priority = v ?? 'Medium'),
-                      ),
-                    )
-                    .toList(),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: _priorities.map((p) {
+                  final selected = _priority == p;
+                  return ChoiceChip(
+                    label: Text(p),
+                    selected: selected,
+                    onSelected: (sel) {
+                      if (sel) setState(() => _priority = p);
+                    },
+                  );
+                }).toList(),
               ),
 
               const SizedBox(height: 16),

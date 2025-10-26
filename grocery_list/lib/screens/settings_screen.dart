@@ -33,12 +33,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirmed == true) {
-        // Perform a destructive clear of DB and in-memory caches.
-        await InMemoryRepo.instance.clearAllData();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('All data cleared (persistent)')),
-        );
+      // Perform a destructive clear of DB and in-memory caches.
+      await InMemoryRepo.instance.clearAllData();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All data cleared (persistent)')),
+      );
     }
   }
 
