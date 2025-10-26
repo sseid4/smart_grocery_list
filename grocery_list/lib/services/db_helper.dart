@@ -137,14 +137,17 @@ class DBHelper {
   Future<void> setCategoryImage(String category, String? imagePath) async {
     final db = await database;
     if (imagePath == null || imagePath.isEmpty) {
-      await db.delete('category_images', where: 'category = ?', whereArgs: [category]);
+      await db.delete(
+        'category_images',
+        where: 'category = ?',
+        whereArgs: [category],
+      );
       return;
     }
-    await db.insert(
-      'category_images',
-      {'category': category, 'imagePath': imagePath},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('category_images', {
+      'category': category,
+      'imagePath': imagePath,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // Update an existing item by id.

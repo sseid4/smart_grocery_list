@@ -170,7 +170,9 @@ class InMemoryRepo {
   // Update an existing item by id in the in-memory list.
   // Update an existing item by id and persist the change.
   Future<void> updateItem(Item updated) async {
-    final list = items.value.map((i) => i.id == updated.id ? updated : i).toList();
+    final list = items.value
+        .map((i) => i.id == updated.id ? updated : i)
+        .toList();
     items.value = list;
     final g = GroceryItem(
       id: updated.id,
@@ -208,17 +210,21 @@ class InMemoryRepo {
         final updated = i.copyWith(purchased: !i.purchased);
         newList.add(updated);
         try {
-          await DBHelper().updateItem(GroceryItem(
-            id: updated.id,
-            name: updated.name,
-            quantity: updated.quantity,
-            category: updated.category,
-            notes: updated.notes.isNotEmpty ? updated.notes : null,
-            purchased: updated.purchased,
-            priority: updated.priority,
-            estimatedPrice: updated.price,
-            imagePath: updated.imagePath.isNotEmpty ? updated.imagePath : null,
-          ));
+          await DBHelper().updateItem(
+            GroceryItem(
+              id: updated.id,
+              name: updated.name,
+              quantity: updated.quantity,
+              category: updated.category,
+              notes: updated.notes.isNotEmpty ? updated.notes : null,
+              purchased: updated.purchased,
+              priority: updated.priority,
+              estimatedPrice: updated.price,
+              imagePath: updated.imagePath.isNotEmpty
+                  ? updated.imagePath
+                  : null,
+            ),
+          );
         } catch (e) {
           if (kDebugMode) print('Failed to persist toggle: $e');
         }

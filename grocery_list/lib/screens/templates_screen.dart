@@ -54,7 +54,7 @@ class TemplatesScreen extends StatelessWidget {
                             ],
                           ),
                         );
-                          if (confirmed == true) {
+                        if (confirmed == true) {
                           // Convert planData items into Items and replace repo items
                           final data = tpl.planData as Map<String, dynamic>;
                           final items = <dynamic>[];

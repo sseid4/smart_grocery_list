@@ -349,7 +349,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text('Image set for "$name"'),
-                                      duration: const Duration(milliseconds: 900),
+                                      duration: const Duration(
+                                        milliseconds: 900,
+                                      ),
                                     ),
                                   );
                                 }
@@ -435,10 +437,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                           InMemoryRepo.instance.deleteItem(
                                             it.id,
                                           );
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
-                                              content: Text('${it.name} deleted'),
-                                              duration: const Duration(milliseconds: 900),
+                                              content: Text(
+                                                '${it.name} deleted',
+                                              ),
+                                              duration: const Duration(
+                                                milliseconds: 900,
+                                              ),
                                             ),
                                           );
                                         },

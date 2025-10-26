@@ -30,3 +30,9 @@ Persistence
  - Items and templates are persisted in `smart_grocery.db` (app documents directory).
  - Settings are saved in SharedPreferences.
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 8b4a2b2df2b2605b5f41258dd0834b22850f704c
