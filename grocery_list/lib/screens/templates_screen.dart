@@ -58,8 +58,9 @@ class TemplatesScreen extends StatelessWidget {
                           // Convert planData items into Items and replace repo items
                           final data = tpl.planData as Map<String, dynamic>;
                           final items = <dynamic>[];
-                          if (data['items'] is List)
+                          if (data['items'] is List) {
                             items.addAll(data['items'] as List);
+                          }
                           // Replace items in repo
                           InMemoryRepo.instance.clear();
                           for (final it in items) {

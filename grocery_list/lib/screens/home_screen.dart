@@ -134,10 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           it.name.toLowerCase().contains(_query.toLowerCase()),
                     )
                     .toList();
-                if (filtered.isEmpty)
+                if (filtered.isEmpty) {
                   return const Center(
                     child: Text('No items match your search.'),
                   );
+                }
                 return ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   itemBuilder: (ctx, i) {
@@ -182,12 +183,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? TextStyle(
                                   decoration: TextDecoration.lineThrough,
                                   color:
-                                      Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.color
-                                          ?.withOpacity(0.6) ??
-                                      Colors.grey,
+                        Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.color
+                              ?.withAlpha((0.6 * 255).round()) ??
+                            Colors.grey,
                                 )
                               : TextStyle(
                                   decoration: TextDecoration.none,
