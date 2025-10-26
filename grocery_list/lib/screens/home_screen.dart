@@ -61,42 +61,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _showSearch
-          ? AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => setState(() {
-                  _showSearch = false;
-                  _searchController.clear();
-                }),
-              ),
-              title: TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search',
-                  border: InputBorder.none,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => setState(() {
-                    _showSearch = false;
-                    _searchController.clear();
-                  }),
-                ),
-              ],
-            )
-          : AppBar(
-              title: const Text('Home'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => setState(() => _showSearch = true),
-                ),
-              ],
-            ),
+      //appBar: AppBar(title: const Text('Home')),
+      appBar: AppBar(
+        title: const Text('Home'),
+        actions: [
+          IconButton(
+            onPressed: _openSettings,
+            icon: const Icon(Icons.settings),
+          ),
+        ],
+      ),
+
       body: Column(
         children: [
           // Search field moved to AppBar and only appears when _showSearch is true.
@@ -120,10 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.calendar_today),
                   label: const Text('Weekly'),
                 ),
-                IconButton(
-                  onPressed: _openSettings,
-                  icon: const Icon(Icons.settings),
-                ),
+                //IconButton(
+                //  onPressed: _openSettings,
+                //  icon: const Icon(Icons.settings),
+                //),
               ],
             ),
           ),
