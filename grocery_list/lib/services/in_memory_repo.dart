@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/item.dart';
+import 'db_helper.dart';
+import 'grocery_item.dart';
 
 class InMemoryRepo {
   InMemoryRepo._init();
@@ -9,6 +11,38 @@ class InMemoryRepo {
   int _nextId = 1;
 
   List<Item> get all => List.unmodifiable(items.value);
+
+  /// Load items from SQLite via DBHelper and populate the in-memory notifier.
+  /// Call this at app startup (for example from main) to seed the cache.
+  Future<void> loadFromDb() async {
+    try {
+      final db = DBHelper();
+      final List<GroceryItem> dbItems = await db
+          .getAllItems(); // returns List<GroceryItem>
+      final converted = dbItems.map((GroceryItem g) {
+        return Item(
+          id: g.id ?? _nextId++,
+          name: g.name,
+          quantity: g.quantity,
+          price: g.estimatedPrice ?? 0.0,
+          notes: g.notes ?? '',
+          category: g.category,
+          priority: g.priority,
+          purchased: g.purchased,
+        );
+      }).toList();
+
+      // ensure _nextId is ahead of any existing ids
+      for (final it in converted) {
+        if (it.id >= _nextId) _nextId = it.id + 1;
+      }
+
+      items.value = converted;
+    } catch (e) {
+      // ignore DB errors here; caller can decide how to surface them
+      if (kDebugMode) print('Failed loading DB items: $e');
+    }
+  }
 
   void addItem(Item item) {
     final toAdd = item.copyWith(id: _nextId++);

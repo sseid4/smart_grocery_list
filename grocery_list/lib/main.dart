@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'services/grocery_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_item_screen.dart';
+import 'services/in_memory_repo.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load items from SQLite into the in-memory repo before starting the app.
+  await InMemoryRepo.instance.loadFromDb();
+
   runApp(const SmartGroceryApp());
 }
 
@@ -13,29 +17,11 @@ class SmartGroceryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GroceryProvider()..loadItems(),
-      child: MaterialApp(
-        title: 'Smart Grocery',
-        theme: ThemeData(
-          primarySwatch: Colors.green,
-          useMaterial3: true,
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const HomeScreen(),
-          '/add': (context) => const AddItemScreen(),
-        },
-      ),
     return MaterialApp(
       title: 'Smart Grocery',
+      theme: ThemeData(primarySwatch: Colors.green, useMaterial3: true),
       home: const HomeScreen(),
-      routes: {
-        AddItemScreen.routeName: (ctx) => const AddItemScreen(),
-        CategoriesScreen.routeName: (ctx) => const CategoriesScreen(),
-        WeeklyGeneratorScreen.routeName: (ctx) => const WeeklyGeneratorScreen(),
-        SettingsScreen.routeName: (ctx) => const SettingsScreen(),
-      },
+      routes: {'/add': (ctx) => const AddItemScreen()},
     );
   }
 }
