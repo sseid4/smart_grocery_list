@@ -234,6 +234,22 @@ class _AddItemScreenState extends State<AddItemScreen> {
               const SizedBox(height: 12),
 
               TextFormField(
+                controller: _priceCtrl,
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Enter a price';
+                  final d = double.tryParse(v);
+                  if (d == null || d < 0) return 'Enter valid price';
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 12),
+
+              TextFormField(
                 controller: _notesCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Notes (optional)',

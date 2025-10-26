@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _showSearch = false;
   final TextEditingController _searchController = TextEditingController();
   String? _selectedCategory;
+  String _sortMode = 'none'; // 'none' | 'name' | 'priority'
 
   void _openAddItem() async {
     await Navigator.pushNamed(context, '/add');
@@ -91,6 +92,22 @@ class _HomeScreenState extends State<HomeScreen> {
           : AppBar(
               title: const Text('Home'),
               actions: [
+                PopupMenuButton<String>(
+                  onSelected: (v) => setState(() => _sortMode = v),
+                  tooltip: 'Sort items',
+                  itemBuilder: (ctx) => [
+                    const PopupMenuItem(value: 'none', child: Text('No sort')),
+                    const PopupMenuItem(
+                      value: 'name',
+                      child: Text('Sort by name'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'priority',
+                      child: Text('Sort by priority'),
+                    ),
+                  ],
+                  icon: const Icon(Icons.sort),
+                ),
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () => setState(() => _showSearch = true),
@@ -244,6 +261,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             _selectedCategory!.toLowerCase();
                   return matchesQuery && matchesCategory;
                 }).toList();
+                // apply sorting
+                List<Item> sortedFiltered = List.from(filtered);
+                int priorityScore(String p) {
+                  final low = p.toLowerCase();
+                  if (low.contains('high')) return 3;
+                  if (low.contains('med')) return 2;
+                  return 1;
+                }
+
+                if (_sortMode == 'name') {
+                  sortedFiltered.sort(
+                    (a, b) =>
+                        a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+                  );
+                } else if (_sortMode == 'priority') {
+                  sortedFiltered.sort(
+                    (a, b) => priorityScore(
+                      b.priority,
+                    ).compareTo(priorityScore(a.priority)),
+                  );
+                }
+                if (list.isEmpty) {
+                  return const Center(child: Text('No items added'));
+                }
+
                 if (filtered.isEmpty) {
                   return const Center(
                     child: Text('No items match your search.'),
@@ -270,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             title,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          Text('${filtered.length}'),
+                          Text('${sortedFiltered.length}'),
                         ],
                       ),
                     ),
@@ -278,12 +320,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         itemBuilder: (ctx, i) {
-                          final it = filtered[i];
-                          final originalIndex = InMemoryRepo
-                              .instance
-                              .items
-                              .value
-                              .indexWhere((e) => e.id == it.id);
+                          final it = sortedFiltered[i];
+                          final originalIndex = InMemoryRepo.instance.items.value.indexWhere((e) => e.id == it.id);
 
                           return Dismissible(
                             key: ValueKey('item-${it.id}'),
