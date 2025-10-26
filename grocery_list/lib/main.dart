@@ -27,6 +27,15 @@ class SmartGroceryApp extends StatelessWidget {
           '/add': (context) => const AddItemScreen(),
         },
       ),
+    return MaterialApp(
+      title: 'Smart Grocery',
+      home: const HomeScreen(),
+      routes: {
+        AddItemScreen.routeName: (ctx) => const AddItemScreen(),
+        CategoriesScreen.routeName: (ctx) => const CategoriesScreen(),
+        WeeklyGeneratorScreen.routeName: (ctx) => const WeeklyGeneratorScreen(),
+        SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+      },
     );
   }
 }
