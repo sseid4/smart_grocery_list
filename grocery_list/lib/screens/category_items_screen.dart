@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/item.dart';
 import '../services/in_memory_repo.dart';
+import '../widgets/priority_indicator.dart';
 import 'edit_detail_screen.dart';
 
 class CategoryItemsScreen extends StatelessWidget {
@@ -44,7 +45,7 @@ class CategoryItemsScreen extends StatelessWidget {
                     value: it.purchased,
                     onChanged: (_) => InMemoryRepo.instance.togglePurchased(it.id),
                   ),
-                  title: Text(it.name),
+                  title: Row(children: [PriorityIndicator(priority: it.priority), const SizedBox(width: 8), Expanded(child: Text(it.name))]),
                   subtitle: Text('Qty: ${it.quantity} • \$${it.price.toStringAsFixed(2)}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
