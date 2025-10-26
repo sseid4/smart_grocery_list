@@ -14,6 +14,7 @@ class AddItemScreen extends StatefulWidget {
 class _AddItemScreenState extends State<AddItemScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
+  final _nameFocus = FocusNode();
   final _quantityCtrl = TextEditingController(text: '1');
   final _priceCtrl = TextEditingController(text: '0.0');
 
@@ -31,6 +32,31 @@ class _AddItemScreenState extends State<AddItemScreen> {
   ];
 
   static const List<String> _priorities = ['High', 'Medium', 'Low'];
+
+  // Quick-add presets for commonly used items. Tapping one will immediately
+  // add it to the repo with default values so users can add common items fast.
+  static const List<Map<String, dynamic>> _quickItems = [
+    {'name': 'Milk', 'category': 'Dairy', 'price': 1.5},
+    {'name': 'Eggs', 'category': 'Dairy', 'price': 2.0},
+    {'name': 'Bread', 'category': 'Bakery', 'price': 1.8},
+    {'name': 'Bananas', 'category': 'Fruits', 'price': 0.4},
+    {'name': 'Apples', 'category': 'Fruits', 'price': 0.6},
+    {'name': 'Tomatoes', 'category': 'Vegetables', 'price': 1.2},
+    {'name': 'Potatoes', 'category': 'Vegetables', 'price': 0.9},
+    {'name': 'Onions', 'category': 'Vegetables', 'price': 0.7},
+    {'name': 'Chicken', 'category': 'Meat', 'price': 5.0},
+    {'name': 'Rice', 'category': 'Pantry', 'price': 2.5},
+    {'name': 'Pasta', 'category': 'Pantry', 'price': 1.6},
+    {'name': 'Cheese', 'category': 'Dairy', 'price': 3.0},
+    {'name': 'Butter', 'category': 'Dairy', 'price': 2.2},
+    {'name': 'Yogurt', 'category': 'Dairy', 'price': 1.0},
+    {'name': 'Cereal', 'category': 'Pantry', 'price': 3.5},
+    {'name': 'Coffee', 'category': 'Pantry', 'price': 6.0},
+    {'name': 'Tea', 'category': 'Pantry', 'price': 3.0},
+    {'name': 'Sugar', 'category': 'Pantry', 'price': 1.2},
+    {'name': 'Flour', 'category': 'Pantry', 'price': 1.5},
+    {'name': 'Olive oil', 'category': 'Pantry', 'price': 7.0},
+  ];
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
@@ -68,6 +94,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _nameFocus.dispose();
     _quantityCtrl.dispose();
     _priceCtrl.dispose();
     super.dispose();
@@ -83,8 +110,55 @@ class _AddItemScreenState extends State<AddItemScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              const Text(
+                'Quick add',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _quickItems.map((m) {
+                  void addImmediate() {
+                    final item = Item(
+                      id: 0,
+                      name: m['name'] as String,
+                      quantity: 1,
+                      price: (m['price'] as num).toDouble(),
+                      category: m['category'] as String,
+                      priority: 'Medium',
+                    );
+                    InMemoryRepo.instance.addItem(item);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('${item.name} added')),
+                    );
+                  }
+
+                  return GestureDetector(
+                    onLongPress: () {
+                      // Prefill the form so user can edit before saving
+                      setState(() {
+                        _nameCtrl.text = m['name'] as String;
+                        _category = m['category'] as String;
+                        _priceCtrl.text = (m['price'] as num).toString();
+                        _quantityCtrl.text = '1';
+                        _priority = 'Medium';
+                      });
+                      // focus the name field for convenience
+                      FocusScope.of(context).requestFocus(_nameFocus);
+                    },
+                    child: ActionChip(
+                      label: Text(m['name'] as String),
+                      onPressed: addImmediate,
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 12),
+
               TextFormField(
                 controller: _nameCtrl,
+                focusNode: _nameFocus,
                 decoration: const InputDecoration(labelText: 'Item name'),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Enter item name' : null,

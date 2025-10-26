@@ -138,18 +138,28 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: it.purchased
                               ? TextStyle(
                                   decoration: TextDecoration.lineThrough,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.6) ?? Colors.grey,
+                                  color:
+                                      Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge
+                                          ?.color
+                                          ?.withOpacity(0.6) ??
+                                      Colors.grey,
                                 )
                               : TextStyle(
                                   decoration: TextDecoration.none,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
                                 ),
                           duration: const Duration(milliseconds: 200),
-                          child: Row(children: [
-                            PriorityIndicator(priority: it.priority),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(it.name)),
-                          ]),
+                          child: Row(
+                            children: [
+                              PriorityIndicator(priority: it.priority),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(it.name)),
+                            ],
+                          ),
                         ),
                         subtitle: AnimatedOpacity(
                           opacity: it.purchased ? 0.5 : 1.0,

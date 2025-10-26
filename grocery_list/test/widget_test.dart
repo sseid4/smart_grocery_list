@@ -13,9 +13,9 @@ import 'package:grocery_list/main.dart';
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-  await tester.pumpWidget(const SmartGroceryApp());
+    await tester.pumpWidget(const SmartGroceryApp());
 
-  // Verify that the home screen title is present and basic UI builds.
-  expect(find.text('Home'), findsOneWidget);
+    // Verify that the home screen title is present and basic UI builds.
+    expect(find.text('Home'), findsOneWidget);
   });
 }

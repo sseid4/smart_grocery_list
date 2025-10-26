@@ -16,7 +16,11 @@ class CategoryItemsScreen extends StatelessWidget {
       body: ValueListenableBuilder<List<Item>>(
         valueListenable: InMemoryRepo.instance.items,
         builder: (context, items, _) {
-          final filtered = items.where((it) => it.category.toLowerCase() == category.toLowerCase()).toList();
+          final filtered = items
+              .where(
+                (it) => it.category.toLowerCase() == category.toLowerCase(),
+              )
+              .toList();
           if (filtered.isEmpty) {
             return Center(child: Text('No items found in "$category"'));
           }
@@ -38,20 +42,41 @@ class CategoryItemsScreen extends StatelessWidget {
                 ),
                 onDismissed: (_) {
                   InMemoryRepo.instance.deleteItem(it.id);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${it.name} deleted')));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('${it.name} deleted')));
                 },
                 child: ListTile(
                   leading: Checkbox(
                     value: it.purchased,
-                    onChanged: (_) => InMemoryRepo.instance.togglePurchased(it.id),
+                    onChanged: (_) =>
+                        InMemoryRepo.instance.togglePurchased(it.id),
                   ),
-                  title: Row(children: [PriorityIndicator(priority: it.priority), const SizedBox(width: 8), Expanded(child: Text(it.name))]),
-                  subtitle: Text('Qty: ${it.quantity} • \$${it.price.toStringAsFixed(2)}'),
+                  title: Row(
+                    children: [
+                      PriorityIndicator(priority: it.priority),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(it.name)),
+                    ],
+                  ),
+                  subtitle: Text(
+                    'Qty: ${it.quantity} • \$${it.price.toStringAsFixed(2)}',
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EditDetailScreen(item: it))),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditDetailScreen(item: it),
+                      ),
+                    ),
                   ),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EditDetailScreen(item: it))),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditDetailScreen(item: it),
+                    ),
+                  ),
                 ),
               );
             },
