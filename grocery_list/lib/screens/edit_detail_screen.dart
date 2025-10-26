@@ -19,6 +19,7 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
   late TextEditingController _nameCtrl;
   late TextEditingController _quantityCtrl;
   late TextEditingController _priceCtrl;
+  late TextEditingController _notesCtrl;
   String? _category;
   String _priority = 'Medium';
 
@@ -44,6 +45,7 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
     _priceCtrl = TextEditingController(text: _item.price.toString());
     _category = _item.category;
     _priority = _item.priority;
+    _notesCtrl = TextEditingController(text: _item.notes);
   }
 
   @override
@@ -51,6 +53,7 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
     _nameCtrl.dispose();
     _quantityCtrl.dispose();
     _priceCtrl.dispose();
+    _notesCtrl.dispose();
     super.dispose();
   }
 
@@ -60,6 +63,7 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
       name: _nameCtrl.text.trim(),
       quantity: int.tryParse(_quantityCtrl.text) ?? 1,
       price: double.tryParse(_priceCtrl.text) ?? 0.0,
+      notes: _notesCtrl.text.trim(),
       category: _category ?? '',
       priority: _priority,
     );
@@ -166,6 +170,14 @@ class _EditDetailScreenState extends State<EditDetailScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _notesCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                ),
+                maxLines: 2,
               ),
               const SizedBox(height: 12),
               const Text(

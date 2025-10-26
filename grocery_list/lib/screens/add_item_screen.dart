@@ -17,6 +17,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _nameFocus = FocusNode();
   final _quantityCtrl = TextEditingController(text: '1');
   final _priceCtrl = TextEditingController(text: '0.0');
+  final _notesCtrl = TextEditingController();
 
   String? _category;
   String _priority = 'Medium';
@@ -62,6 +63,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       name: name,
       quantity: quantity,
       price: price,
+      notes: _notesCtrl.text.trim(),
       category: category,
       priority: priority,
     );
@@ -87,6 +89,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     _nameFocus.dispose();
     _quantityCtrl.dispose();
     _priceCtrl.dispose();
+    _notesCtrl.dispose();
     super.dispose();
   }
 
@@ -230,6 +233,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
 
               const SizedBox(height: 16),
+              TextFormField(
+                controller: _notesCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
               ElevatedButton(onPressed: _save, child: const Text('Save')),
             ],
           ),

@@ -207,13 +207,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         subtitle: AnimatedOpacity(
                           opacity: it.purchased ? 0.5 : 1.0,
                           duration: const Duration(milliseconds: 200),
-                          child: Text(
-                            'Qty: ${it.quantity}  •  \$${it.price.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.color,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Qty: ${it.quantity}  •  \$${it.price.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium?.color,
+                                ),
+                              ),
+                              if (it.notes.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    it.notes,
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall?.color,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         trailing: IconButton(

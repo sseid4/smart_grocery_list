@@ -10,6 +10,15 @@ Features
  - Persistent storage for items and templates (SQLite)
  - Persisted settings (dark mode, notifications) via SharedPreferences
 
+Generator presets (short)
+ - Balanced — favors higher-priority items but prefers cheaper items when priorities tie; good general-purpose selection.
+ - Low-cost — sorts candidates by ascending price and picks the cheapest items first; use when minimizing spend.
+ - Staples — prioritizes items by declared priority (High > Medium > Low), surfacing important staples regardless of price.
+
+Controls
+ - Target items: hard limit on how many items the generator will pick.
+ - Budget: optional cap; when set the generator skips items that would push the running total over the budget (greedy skip, not an exact knapsack).
+
 
 Architecture notes
  - `lib/services/db_helper.dart` — SQLite helper and schema
