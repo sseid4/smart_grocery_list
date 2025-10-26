@@ -30,8 +30,6 @@ Persistence
  - Items and templates are persisted in `smart_grocery.db` (app documents directory).
  - Settings are saved in SharedPreferences.
 
-Notes
- - The project uses a ValueNotifier-based in-memory store for simplicity. If you prefer a more structured state-management approach, migrating to Provider/ChangeNotifier or Riverpod is straightforward.
- - Running `flutter analyze` will show a few informational lints about deprecated APIs (some widgets migrated away from deprecated Radio APIs).
+
 
 
