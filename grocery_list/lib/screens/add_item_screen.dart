@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-
 import '../models/item.dart';
 import '../services/in_memory_repo.dart';
 
@@ -158,7 +156,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
              const SizedBox(height: 12),
 
 
-             
+
              const Text(
                'Priority',
                style: TextStyle(fontWeight: FontWeight.bold),
